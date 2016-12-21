@@ -1216,7 +1216,8 @@ class ClusterInfoV2(ClusterInfoV13):
 
     def set_compute_config(self, compute_validated=None, use_account_compute_creds=None, compute_client_id=None,
                            compute_client_secret=None, compute_tenant_id=None, compute_access_key=None,
-                           compute_secret_key=None, compute_subscription_id=None):
+                           compute_secret_key=None, compute_subscription_id=None,
+                           compute_user_id=None, compute_key_finger_print=None, compute_api_private_rsa_key=None):
         self.cloud_config['compute_config'] = {}
         self.cloud_config['compute_config']['compute_validated'] = compute_validated
         self.cloud_config['compute_config']['use_account_compute_creds'] = use_account_compute_creds
@@ -1229,16 +1230,25 @@ class ClusterInfoV2(ClusterInfoV13):
         self.cloud_config['compute_config']['compute_client_id'] = compute_client_id
         self.cloud_config['compute_config']['compute_client_secret'] = compute_client_secret
 
-    def set_location(self, location=None, aws_region=None, aws_availability_zone=None):
+        self.cloud_config['compute_config']['compute_user_id'] = compute_user_id
+        self.cloud_config['compute_config']['compute_key_finger_print'] = compute_key_finger_print
+        self.cloud_config['compute_config']['compute_api_private_rsa_key'] = compute_api_private_rsa_key
+
+    def set_location(self, location=None, aws_region=None, aws_availability_zone=None,
+                     availability_domain=None, region=None):
         self.cloud_config['location'] = {}
         self.cloud_config['location']['location'] = location
 
         self.cloud_config['location']['aws_region'] = aws_region
         self.cloud_config['location']['aws_availability_zone'] = aws_availability_zone
 
+        self.cloud_config['location']['region'] = region
+        self.cloud_config['location']['availability_domain'] = availability_domain
+
     def set_network_config(self, vpc_id=None, subnet_id=None, bastion_node_public_dns=None,
                            persistent_security_groups=None, master_elastic_ip=None, vnet_name =None,
-                           subnet_name=None, vnet_resource_group_name=None):
+                           subnet_name=None, vnet_resource_group_name=None,
+                           compartment_id=None, image_id=None):
         self.cloud_config['network_config'] = {}
         self.cloud_config['network_config']['bastion_node_public_dns'] = bastion_node_public_dns
         self.cloud_config['network_config']['persistent_security_groups'] = persistent_security_groups
@@ -1251,14 +1261,26 @@ class ClusterInfoV2(ClusterInfoV13):
         self.cloud_config['network_config']['subnet_name'] = subnet_name
         self.cloud_config['network_config']['vnet_resource_group_name'] = vnet_resource_group_name
 
+        self.cloud_config['network_config']['compartment_id'] = compartment_id
+        self.cloud_config['network_config']['image_id'] = image_id
+
     def set_storage_config(self, storage_access_key=None, storage_account_name=None, disk_storage_account_name=None,
-                           disk_storage_account_resource_group_name=None):
+                           disk_storage_account_resource_group_name=None,
+                           storage_tenant_id=None, storage_user_id=None,
+                           storage_key_finger_print=None, storage_api_private_rsa_key=None):
         self.cloud_config['storage_config'] = {}
         self.cloud_config['storage_config']['storage_access_key'] = storage_access_key
         self.cloud_config['storage_config']['storage_account_name'] = storage_account_name
         self.cloud_config['storage_config']['disk_storage_account_name'] = disk_storage_account_name
         self.cloud_config['storage_config']['disk_storage_account_resource_group_name'] \
             = disk_storage_account_resource_group_name
+        self.cloud_config['storage_config']['storage_tenant_id'] = storage_tenant_id
+        self.cloud_config['storage_config']['storage_user_id'] = storage_user_id
+        self.cloud_config['storage_config']['storage_key_finger_print'] = storage_key_finger_print
+        self.cloud_config['storage_config']['storage_api_private_rsa_key'] = storage_api_private_rsa_key
+
+    def set_provider(self, provider=None):
+        self.cloud_config['provider'] = provider
 
     def set_engine_config(self, flavour, custom_hadoop_config =None, use_qubole_placement_policy=None,
                           presto_version=None, custom_presto_config=None, spark_version=None,
@@ -1333,14 +1355,14 @@ class ClusterInfoV2(ClusterInfoV13):
 
 
     def set_spot_instance_settings(self, maximum_bid_price_percentage=100, timeout_for_request=10,
-                          maximum_spot_instance_percentage=50):
+                                   maximum_spot_instance_percentage=50):
         self.cluster_info['spot_settings']['spot_instance_settings'] = {}
         self.cluster_info['spot_settings']['spot_instance_settings']['maximum_bid_price_percentage'] = maximum_bid_price_percentage
         self.cluster_info['spot_settings']['spot_instance_settings']['timeout_for_request'] = timeout_for_request
         self.cluster_info['spot_settings']['spot_instance_settings']['maximum_spot_instance_percentage'] = maximum_spot_instance_percentage
 
     def set_stable_spot_bid_settings(self, stable_maximum_bid_price_percentage=150,
-                          stable_timeout_for_request=10, stable_allow_fallback=None):
+                                     stable_timeout_for_request=10, stable_allow_fallback=None):
         self.cluster_info['spot_settings']['stable_spot_bid_settings'] = {}
         self.cluster_info['spot_settings']['stable_spot_bid_settings']['stable_maximum_bid_price_percentage'] = stable_maximum_bid_price_percentage
         self.cluster_info['spot_settings']['stable_spot_bid_settings']['stable_timeout_for_request'] = stable_timeout_for_request
@@ -1356,15 +1378,22 @@ class ClusterInfoV2(ClusterInfoV13):
 
     def set_cluster_info(self, kwargs):
         self.set_compute_config(kwargs['compute_validated'], kwargs['use_account_compute_creds'],
-                              kwargs['compute_access_key'], kwargs['compute_secret_key'], kwargs['compute_tenant_id'],
-                              kwargs['compute_subscription_id'], kwargs['compute_client_id'],
-                              kwargs['compute_client_secret'])
-        self.set_location(kwargs['location'], kwargs['aws_region'], kwargs['aws_availability_zone'])
+                                kwargs['compute_access_key'], kwargs['compute_secret_key'], kwargs['compute_tenant_id'],
+                                kwargs['compute_subscription_id'], kwargs['compute_client_id'],
+                                kwargs['compute_client_secret'],
+                                kwargs['compute_user_id'],kwargs['compute_key_finger_print'],
+                                kwargs['compute_api_private_rsa_key'])
+        self.set_location(kwargs['location'], kwargs['aws_region'], kwargs['aws_availability_zone'],
+                          kwargs['region'], kwargs['availability_domain'])
         self.set_network_config(kwargs['vpc_id'],kwargs['subnet_id'], kwargs['bastion_node_public_dns'],
                                 kwargs['persistent_security_groups'], kwargs['master_elastic_ip'], kwargs['vnet_name'],
-                                kwargs['subnet_name'], kwargs['vnet_resource_group_name'])
+                                kwargs['subnet_name'], kwargs['vnet_resource_group_name'],
+                                kwargs['compartment_id'], kwargs['image_id'])
         self.set_storage_config(kwargs['storage_access_key'], kwargs['storage_account_name'],
-                                kwargs['disk_storage_account_name'], kwargs['disk_storage_account_resource_group_name'])
+                                kwargs['disk_storage_account_name'], kwargs['disk_storage_account_resource_group_name'],
+                                kwargs['storage_tenant_id'], kwargs['storage_user_id'],
+                                kwargs['storage_key_finger_print'], kwargs['storage_api_private_rsa_key'])
+        self.set_provider(kwargs['provider'])
         self.set_engine_config(kwargs['flavour'], kwargs['custom_hadoop_config'], kwargs['use_qubole_placement_policy'], kwargs['presto_version'],
                                kwargs['custom_presto_config'], kwargs['spark_version'],
                                kwargs['custom_spark_config'], kwargs['dbtap_id'], kwargs['fernet_key'],
@@ -1378,12 +1407,12 @@ class ClusterInfoV2(ClusterInfoV13):
                                      kwargs['custom_tags'], kwargs['heterogeneous_config'],
                                      kwargs['slave_request_type'])
         self.set_data_disk(kwargs['size'], kwargs['count'], kwargs['disk_type'],
-                                     kwargs['upscaling_config'], kwargs['enable_encryption'])
+                           kwargs['upscaling_config'], kwargs['enable_encryption'])
         self.cluster_info['spot_settings'] = {}
         self.set_spot_instance_settings( kwargs['maximum_bid_price_percentage'],
-                                     kwargs['timeout_for_request'], kwargs['maximum_spot_instance_percentage'])
+                                         kwargs['timeout_for_request'], kwargs['maximum_spot_instance_percentage'])
         self.set_stable_spot_bid_settings(kwargs['stable_maximum_bid_price_percentage'],
-                                     kwargs['stable_timeout_for_request'], kwargs['stable_allow_fallback'])
+                                          kwargs['stable_timeout_for_request'], kwargs['stable_allow_fallback'])
 
 
 def _make_minimal(dictionary):
